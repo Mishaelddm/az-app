@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Azərbaycanca</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0E2229">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Azərbaycanca">
+<link rel="apple-touch-icon" href="icon.png">
+<style>
+  :root{--ground:#0E2229;--surface:#15323B;--edge:#20454F;--text:#EDF3F2;
+        --mute:#789BA3;--accent:#E8B23A;--warm:#D6455B;--ok:#4FB58B}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--ground);color:var(--text)}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+       -webkit-font-smoothing:antialiased;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  #app{max-width:440px;margin:0 auto;padding:20px 18px 24px}
+  .az{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-weight:500;line-height:1.28}
+  .tricky{border-bottom:2px dotted var(--accent);padding-bottom:1px;cursor:pointer}
+  .tr{color:var(--accent)} .mute{color:var(--mute)}
+  .head{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);margin-bottom:22px}
+  button{font-family:inherit;color:var(--text);cursor:pointer}
+  .btn{display:block;width:100%;text-align:center;border:1px solid var(--edge);background:none;
+       border-radius:10px;padding:13px 14px;font-size:15px;margin-bottom:8px}
+  .btn.gold{border-color:var(--accent);color:var(--accent)}
+  .btn.left{text-align:left} .btn.ok{border-color:var(--ok)}
+  .btn.bad{border-color:var(--warm)} .btn.dim{color:var(--mute)}
+  .play{border:1px solid var(--edge);background:none;color:var(--accent);border-radius:999px;
+        width:38px;height:38px;font-size:15px;flex:0 0 auto;padding:0}
+  .play.big{width:54px;height:54px;font-size:21px}
+  .row{display:flex;gap:14px;align-items:flex-start}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .card{background:var(--surface);border-radius:12px;padding:14px 16px}
+  .note{border-left:2px solid var(--warm);padding-left:14px;font-size:14.5px;line-height:1.6;margin:0 0 18px}
+  .tiles{display:flex;flex-wrap:wrap;gap:8px}
+  .tile{border:1px solid var(--edge);background:none;border-radius:8px;padding:9px 13px}
+  .tile.filled{border:none;background:var(--surface)}
+  .drop{min-height:58px;border:1px solid var(--edge);border-radius:10px;padding:12px;
+        display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:18px}
+  .drop.ok{border-color:var(--ok)} .drop.bad{border-color:var(--warm)}
+  nav{position:fixed;left:0;right:0;bottom:0;background:var(--ground);border-top:1px solid var(--edge);
+      display:flex;max-width:440px;margin:0 auto;padding-bottom:env(safe-area-inset-bottom)}
+  nav button{flex:1;border:none;background:none;color:var(--mute);padding:15px 0 17px;font-size:14px}
+  nav button.on{color:var(--accent)}
+  .sheet{position:fixed;inset:0;background:rgba(5,16,20,.74);display:flex;align-items:flex-end;
+         justify-content:center;z-index:50}
+  .sheet>div{background:var(--surface);border-radius:16px 16px 0 0;
+             padding:22px 20px calc(30px + env(safe-area-inset-bottom));width:100%;max-width:440px}
+  .seg{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+  .seg button{flex:1 1 40%;border:1px solid var(--edge);background:none;border-radius:10px;
+              padding:9px 4px;font-size:14px;color:var(--mute)}
+  .seg button.on{border-color:var(--accent);color:var(--accent)}
+  .item{display:flex;gap:14px;align-items:center;padding:13px 0;border-top:1px solid var(--edge)}
+  h2{font-size:21px;font-weight:500;margin:6px 0 6px}
+  .big{font-size:40px;font-weight:300;line-height:1}
+  .stat{display:flex;gap:28px;margin:24px 0 28px}
+  .stat small{display:block;color:var(--mute);font-size:13px;margin-top:6px}
+  .pill{display:inline-block;background:var(--surface);border-radius:999px;
+        padding:4px 11px;font-size:12.5px;color:var(--mute);margin-bottom:10px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav id="nav"></nav>
+<script>
+/* ═══════ звуки ═══════ */
+var TRICKY={
+ "ə":"Короткое «а» из английского cat — рот открыт шире, чем на «э», язык плоский. Самая частая буква языка.",
+ "ı":"Глубже русского «ы»: язык оттянут назад, губы расслаблены. Ни одно слово с неё не начинается.",
+ "ö":"Как немецкое ö в Köln. Язык ставишь на «э», губы складываешь трубочкой на «о» — и язык больше не двигаешь.",
+ "ü":"Как немецкое ü. Язык на «и», губы трубочкой на «у». Выходит «ю» без начального «й».",
+ "ğ":"Звонкий горловой звук, как g в голландском gaan. Произносится всегда — не путай с турецким ğ, который молчит. С неё, как и с ı, слова не начинаются."
+};
+
+/* ═══════ транскрипция ═══════ */
+var AZ_V="aeəıioöuü";
+var L={a:"а",b:"б",c:"дж","ç":"ч",d:"д",e:"е","ə":"æ",f:"ф",g:"г","ğ":"г",h:"х",x:"х","ı":"ы",
+ i:"и",j:"ж",k:"к",q:"г",l:"л",m:"м",n:"н",o:"о","ö":"ё",p:"п",r:"р",s:"с","ş":"ш",t:"т",
+ u:"у","ü":"ю",v:"в",y:"й",z:"з"};
+var FINAL={b:"п",d:"т",c:"ч",g:"к",q:"х",z:"с"};
+var YOTA={a:"я",u:"ю",o:"ё",e:"е","ə":"йæ",i:"йи","ı":"йы","ö":"йё","ü":"йю"};
+var RU_V="аеэёиыоуюæя";
+var STRESS_FIX={professor:1,doktor:0,avtobus:1,menyu:0,taksi:0,metro:0,manat:0,hotel:0};
+
+function ruWord(raw){
+  var w=raw.toLowerCase(); var out="";
+  for(var n=0;n<w.length;n++){
+    var ch=w[n],nx=w[n+1],last=n===w.length-1;
+    if(ch==="y"&&nx&&AZ_V.indexOf(nx)>=0){out+=YOTA[nx];n++;continue}
+    if(ch==="e"&&n===0){out+="э";continue}
+    if(last&&FINAL[ch]){out+=FINAL[ch];continue}
+    out+=(L[ch]!==undefined?L[ch]:ch);
+  }
+  var pos=[];for(var k=0;k<out.length;k++){if(RU_V.indexOf(out[k])>=0)pos.push(k)}
+  if(pos.length>1){
+    var fx=STRESS_FIX[w];
+    var p=(fx!==undefined&&pos[fx]!==undefined)?pos[fx]:pos[pos.length-1];
+    out=out.slice(0,p+1)+"́"+out.slice(p+1);
+  }
+  return out;
+}
+function ruTr(t){return String(t||"").replace(/[a-zA-ZəğışçöüİŞÇÖÜƏĞ]+/g,ruWord)}
+function toTurkish(t){return String(t||"").replace(/ə/g,"e").replace(/Ə/g,"E")
+  .replace(/x/g,"h").replace(/X/g,"H").replace(/ğ/g,"g").replace(/q/g,"g").replace(/Q/g,"G")}
+
+/* ═══════ контент ═══════ */
+function F(before,after,task,options,answer,gloss){return {before:before,after:after,task:task,options:options,answer:answer,gloss:gloss}}
+var BLOCKS=[
+{title:"Вежливость",phrases:[
+ {id:"salam",az:"Salam",ru:"Привет / Здравствуйте",kind:"формула",
+  note:"Главное слово дня. Не сказать salam при встрече — заметная невежливость: про такого спрашивают, где он потерял свой салам.",
+  scene:{who:"на улице",a:"Salam!",aRu:"Привет!",b:"Salam, necəsən?",bRu:"Привет, как ты?"}},
+ {id:"sagolun",az:"Çox sağ olun",ru:"Большое спасибо",kind:"формула",
+  note:"Дословно «очень будьте здоровы». Теплее, чем сухое təşəkkür edirəm — его берегут для официального. Товарищу хватит короткого sağ ol.",
+  scene:{who:"официант и гость",a:"Buyurun.",aRu:"Пожалуйста, вот.",b:"Çox sağ olun.",bRu:"Большое спасибо."}},
+ {id:"zehmet",az:"Zəhmət olmasa",ru:"Будьте добры",kind:"формула",
+  note:"Вежливая обёртка для любой просьбы, дословно «если не затруднит». Цепляется и спереди, и сзади.",
+  scene:{who:"гость и официант",a:"Zəhmət olmasa, mənə su verin.",aRu:"Будьте добры, дайте мне воды.",b:"Buyurun.",bRu:"Пожалуйста."}},
+ {id:"bagislayin",az:"Bağışlayın",ru:"Извините",kind:"формула",
+  note:"Универсальное «извините» — и когда задел человека, и когда обращаешься к незнакомому.",
+  scene:{who:"на улице",a:"Bağışlayın, siz rusca bilirsiniz?",aRu:"Извините, вы знаете русский?",b:"Bəli, bilirəm.",bRu:"Да, знаю."}}
+]},
+{title:"С товарищами",phrases:[
+ {id:"nevar",az:"Nə var, nə yox?",ru:"Что нового?",kind:"формула",
+  note:"Дословно «что есть, чего нет». Живое приветствие между своими. Незнакомому лучше Necəsiniz?",
+  scene:{who:"встретились приятели",a:"Salam! Nə var, nə yox?",aRu:"Привет! Что нового?",b:"Sağ ol, yaxşıyam.",bRu:"Спасибо, я хорошо."}},
+ {id:"yaxsiyam",az:"Yaxşıyam, sən necəsən?",ru:"Я хорошо, ты как?",kind:"каркас",
+  frame:F("Yaxşıyam, siz ","?","Спроси то же самое, но вежливо, на «вы»",["necəsən","necəsiniz","nə var","yaxşıyam"],"necəsiniz","necəsiniz — вежливая форма"),
+  note:"Ответ и встречный вопрос одной репликой. С незнакомым sən necəsən меняешь на siz necəsiniz.",
+  scene:{who:"вежливый разговор",a:"Necəsiniz?",aRu:"Как вы?",b:"Yaxşıyam, çox sağ olun. Siz necəsiniz?",bRu:"Я хорошо, спасибо. А вы?"}},
+ {id:"hersey",az:"Hər şey yaxşıdır",ru:"Всё хорошо",kind:"формула",
+  note:"Стандартный ответ на «как дела». Ещё говорят pis deyil — «неплохо», и əladır — «отлично».",
+  scene:{who:"разговор",a:"İşlər necədir?",aRu:"Как дела?",b:"Hər şey yaxşıdır.",bRu:"Всё хорошо."}},
+ {id:"gorusherik",az:"Görüşərik",ru:"Увидимся",kind:"формула",
+  note:"Прощание между своими, без обязательств встретиться. Официальнее — sağ olun или görüşənədək.",
+  scene:{who:"прощаются",a:"Sağ olun, görüşərik!",aRu:"Всего доброго, увидимся!",b:"Görüşərik!",bRu:"Увидимся!"}}
+]},
+{title:"Есть и нет",phrases:[
+ {id:"cayvar",az:"Çay var?",ru:"Чай есть?",kind:"каркас",
+  frame:F(""," var?","Спроси, есть ли кофе",["su","çay","qəhvə","çörək"],"qəhvə","qəhvə — кофе"),
+  note:"Главная конструкция языка. Слово плюс var — и готов вопрос «есть ли». Глагола «иметь» тут нет вообще.",
+  scene:{who:"в кафе",a:"Çay var?",aRu:"Чай есть?",b:"Bəli, var.",bRu:"Да, есть."}},
+ {id:"yoxdur",az:"Yoxdur",ru:"Нет, нету",kind:"формула",
+  note:"Пара к var. Услышишь постоянно: yoxdur — значит кончилось или не бывает. Коротко можно просто yox.",
+  scene:{who:"в магазине",a:"Çörək var?",aRu:"Хлеб есть?",b:"Yoxdur.",bRu:"Нету."}},
+ {id:"sabunyox",az:"Sabun yoxdur",ru:"Мыла нет",kind:"каркас",
+  frame:F(""," yoxdur","Скажи, что нет воды",["çay","su","sabun","işıq"],"su","su — вода"),
+  note:"Тот же порядок: сначала предмет, потом yoxdur. Пригодится в гостинице — sabun yoxdur, işıq yoxdur.",
+  scene:{who:"на ресепшене",a:"Otaqda sabun yoxdur.",aRu:"В номере нет мыла.",b:"Bağışlayın, indi gətirərik.",bRu:"Извините, сейчас принесём."}},
+ {id:"belivar",az:"Bəli, var",ru:"Да, есть",kind:"формула",
+  note:"Полный ответ на вопрос с var. Bəli — вежливое «да», между своими чаще короткое hə.",
+  scene:{who:"в кафе",a:"Qəhvə var?",aRu:"Кофе есть?",b:"Bəli, var.",bRu:"Да, есть."}}
+]},
+{title:"Заказ в кафе",phrases:[
+ {id:"menyu",az:"Menyu, zəhmət olmasa",ru:"Меню, пожалуйста",kind:"каркас",
+  frame:F(""," , zəhmət olmasa","Попроси счёт",["menyu","hesab","çay","su"],"hesab","hesab — счёт"),
+  note:"Тот же каркас, что и с чаем: предмет плюс zəhmət olmasa. Так просят что угодно.",
+  scene:{who:"в ресторане",a:"Menyu, zəhmət olmasa.",aRu:"Меню, пожалуйста.",b:"Buyurun.",bRu:"Пожалуйста."}},
+ {id:"bunedir",az:"Bu nədir?",ru:"Что это?",kind:"формула",
+  note:"Тычешь в меню и спрашиваешь. Bu — «это», nə — «что», -dir — связка «есть».",
+  scene:{who:"в ресторане",a:"Bu nədir?",aRu:"Что это?",b:"Bu düşbərədir.",bRu:"Это дюшбара."}},
+ {id:"suverin",az:"Mənə su verin",ru:"Дайте мне воды",kind:"каркас",
+  frame:F("Mənə "," verin","Попроси чаю",["su","çay","hesab","çörək"],"çay","çay — чай"),
+  note:"Mənə — «мне», verin — «дайте». Вежливо звучит с обёрткой: zəhmət olmasa, mənə su verin.",
+  scene:{who:"за столом",a:"Zəhmət olmasa, mənə su verin.",aRu:"Будьте добры, дайте мне воды.",b:"Buyurun.",bRu:"Пожалуйста."}},
+ {id:"dadlidir",az:"Çox dadlıdır",ru:"Очень вкусно",kind:"формула",
+  note:"Фраза, которая окупается быстрее всех. Сказанная хозяину дома или повару, она делает больше, чем весь твой словарь.",
+  scene:{who:"за столом",a:"Necədir?",aRu:"Ну как?",b:"Çox dadlıdır!",bRu:"Очень вкусно!"}}
+]},
+{title:"Числа",phrases:[
+ {id:"num15",az:"Bir, iki, üç, dörd, beş",ru:"Один, два, три, четыре, пять",kind:"счёт",
+  note:"Первая пятёрка. Bir заодно работает как «один» в заказе: bir çay — один чай.",
+  scene:{who:"в кафе",a:"Neçə nəfərsiniz?",aRu:"Вас сколько человек?",b:"Üç nəfər.",bRu:"Трое."}},
+ {id:"num610",az:"Altı, yeddi, səkkiz, doqquz, on",ru:"Шесть, семь, восемь, девять, десять",kind:"счёт",
+  note:"Вторая пятёрка. Дальше всё складывается: on bir — одиннадцать, on iki — двенадцать, и так до двадцати.",
+  scene:{who:"на рынке",a:"Neçəyədir?",aRu:"Сколько стоит?",b:"On manat.",bRu:"Десять манат."}},
+ {id:"besmanat",az:"Beş manat",ru:"Пять манат",kind:"каркас",
+  frame:F(""," manat","Скажи «десять манат»",["beş","on","üç","yeddi"],"on","on — десять"),
+  note:"Число плюс manat, без всяких окончаний. Манат делится на сто гяпиков — qəpik.",
+  scene:{who:"на рынке",a:"Bu neçəyədir?",aRu:"Это сколько стоит?",b:"Beş manat.",bRu:"Пять манат."}},
+ {id:"neceyedir",az:"Neçəyədir?",ru:"Сколько стоит?",kind:"формула",
+  note:"Живой разговорный вариант. Работает и с товаром в руках, и с билетом: bilet neçəyədir?",
+  scene:{who:"на рынке",a:"Bu neçəyədir?",aRu:"Это сколько стоит?",b:"Beş manat.",bRu:"Пять манат."}}
+]},
+{title:"Хочу",phrases:[
+ {id:"cayist",az:"Bir çay istəyirəm",ru:"Хочу чаю",kind:"каркас",
+  frame:F("Bir "," istəyirəm","Скажи, что хочешь кофе",["su","qəhvə","çörək","çay"],"qəhvə","qəhvə — кофе"),
+  note:"İstəyirəm — «хочу», и стоит в конце. Это общее правило: глагол в азербайджанском замыкает фразу.",
+  scene:{who:"в кафе",a:"Nə istəyirsiniz?",aRu:"Что желаете?",b:"Bir çay istəyirəm.",bRu:"Хочу чаю."}},
+ {id:"buniste",az:"Bunu istəyirəm",ru:"Хочу вот это",kind:"формула",
+  note:"Спасательный круг, когда не знаешь слова: показываешь пальцем и говоришь bunu istəyirəm.",
+  scene:{who:"у прилавка",a:"Bunu istəyirəm.",aRu:"Хочу вот это.",b:"Bunu? Buyurun.",bRu:"Это? Пожалуйста."}},
+ {id:"istemirem",az:"İstəmirəm",ru:"Не хочу",kind:"формула",
+  note:"Отрицание вставляется внутрь глагола: istəyirəm — хочу, istəmirəm — не хочу. Кусочек -mir- и есть «не».",
+  scene:{who:"за столом",a:"Bir az da çay?",aRu:"Ещё немного чаю?",b:"Yox, sağ ol, istəmirəm.",bRu:"Нет, спасибо, не хочу."}},
+ {id:"uzrist",az:"Üzr istəyirəm",ru:"Прошу прощения",kind:"формула",
+  note:"Тот же глагол, а смысл другой: дословно «прошу прощения». Чуть официальнее, чем bağışlayın.",
+  scene:{who:"извиняется",a:"Üzr istəyirəm, gecikdim.",aRu:"Прошу прощения, я опоздал.",b:"Eybi yoxdur.",bRu:"Ничего страшного."}}
+]},
+{title:"Когда не понял",phrases:[
+ {id:"basadusm",az:"Başa düşmədim",ru:"Я не понял",kind:"формула",
+  note:"Самая нужная фраза первых дней. Говори без стеснения — её ждут и охотно повторяют.",
+  scene:{who:"разговор",a:"Başa düşmədim.",aRu:"Я не понял.",b:"Bir daha deyirəm.",bRu:"Повторю ещё раз."}},
+ {id:"yavas",az:"Yavaş danışın, zəhmət olmasa",ru:"Говорите медленнее, пожалуйста",kind:"каркас",
+  frame:F(""," danışın, zəhmət olmasa","Попроси говорить громче",["yavaş","ucadan","yaxşı","sakit"],"ucadan","ucadan — громче"),
+  note:"Danışın — «говорите». Меняешь наречие спереди: yavaş — медленно, ucadan — громко.",
+  scene:{who:"разговор",a:"Yavaş danışın, zəhmət olmasa.",aRu:"Говорите медленнее, пожалуйста.",b:"Əlbəttə.",bRu:"Конечно."}},
+ {id:"ruscabil",az:"Siz rusca bilirsiniz?",ru:"Вы знаете русский?",kind:"каркас",
+  frame:F("Siz "," bilirsiniz?","Спроси про английский",["rusca","ingiliscə","azərbaycanca","türkcə"],"ingiliscə","ingiliscə — английский"),
+  note:"В Баку почти всегда ответят «да». Но вопрос, заданный по-азербайджански, меняет разговор целиком.",
+  scene:{who:"на улице",a:"Bağışlayın, siz rusca bilirsiniz?",aRu:"Извините, вы знаете русский?",b:"Bəli, bilirəm.",bRu:"Да, знаю."}},
+ {id:"danisabil",az:"Mən azərbaycanca yaxşı danışa bilmirəm",ru:"Я плохо говорю по-азербайджански",kind:"формула",
+  note:"Длинная, но выучить стоит: снимает все ожидания разом и почти всегда вызывает улыбку.",
+  scene:{who:"объясняется",a:"Mən azərbaycanca yaxşı danışa bilmirəm.",aRu:"Я плохо говорю по-азербайджански.",b:"Eybi yoxdur, yavaş danışaram.",bRu:"Ничего, я буду говорить медленно."}}
+]},
+{title:"Мне нужно",phrases:[
+ {id:"taksilaz",az:"Mənə taksi lazımdır",ru:"Мне нужно такси",kind:"каркас",
+  frame:F("Mənə "," lazımdır","Скажи, что нужна помощь",["taksi","kömək","su","hesab"],"kömək","kömək — помощь"),
+  note:"Lazımdır — «нужно», и снова в конце. Mənə — «мне». Подставляешь что угодно между ними.",
+  scene:{who:"на улице",a:"Mənə taksi lazımdır.",aRu:"Мне нужно такси.",b:"İndi çağırıram.",bRu:"Сейчас вызову."}},
+ {id:"lazimdeyil",az:"Lazım deyil",ru:"Не нужно",kind:"формула",
+  note:"Deyil — общее «не» для таких связок: lazım deyil — не нужно, pis deyil — неплохо.",
+  scene:{who:"в магазине",a:"Paket lazımdır?",aRu:"Пакет нужен?",b:"Yox, lazım deyil.",bRu:"Нет, не нужно."}},
+ {id:"komekedin",az:"Kömək edin!",ru:"Помогите!",kind:"формула",
+  note:"Короткий крик о помощи. Спокойнее и вежливее — mənə kömək lazımdır.",
+  scene:{who:"на улице",a:"Kömək edin!",aRu:"Помогите!",b:"Nə olub?",bRu:"Что случилось?"}},
+ {id:"haradadir",az:"Tualet haradadır?",ru:"Где туалет?",kind:"каркас",
+  frame:F(""," haradadır?","Спроси, где метро",["tualet","metro","bazar","hotel"],"metro","metro — метро"),
+  note:"Harada — «где», -dır — связка. Слово вперёд, вопрос назад: metro haradadır, bazar haradadır.",
+  scene:{who:"в кафе",a:"Bağışlayın, tualet haradadır?",aRu:"Извините, где туалет?",b:"Orada, sağda.",bRu:"Там, справа."}}
+]},
+{title:"Откуда ты",phrases:[
+ {id:"adimdir",az:"Mənim adım Mixaildir",ru:"Меня зовут Михаил",kind:"каркас",
+  frame:F("Onun adı ","dır","Скажи, что её зовут Наргиз",["Nərgiz","Fidan","Samir","Vahid"],"Nərgiz","Onun adı — его или её имя"),
+  note:"Дословно «моё имя Михаил есть». Связка -dır прилипает к имени и меняет гласную по гармонии.",
+  scene:{who:"знакомятся",a:"Mənim adım Mixaildir. Sizin adınız nədir?",aRu:"Меня зовут Михаил. А вас как зовут?",b:"Mənim adım Samirdir.",bRu:"Меня зовут Самир."}},
+ {id:"haradan",az:"Siz haradansınız?",ru:"Вы откуда?",kind:"формула",
+  note:"Первый вопрос, который тебе зададут. Harada — где, haradan — откуда.",
+  scene:{who:"знакомятся",a:"Siz haradansınız?",aRu:"Вы откуда?",b:"Mən Rusiyadanam.",bRu:"Я из России."}},
+ {id:"rusiyadan",az:"Mən Rusiyadanam",ru:"Я из России",kind:"каркас",
+  frame:F("Mən ","danam","Скажи, что ты из Канады",["Rusiya","Kanada","Türkiyə","Bakı"],"Kanada","Kanadadanam — я из Канады"),
+  note:"Окончание -danam значит «я из». Rusiyadanam, Kanadadanam — страна и сразу «я оттуда».",
+  scene:{who:"знакомятся",a:"Mən Rusiyadanam. Siz?",aRu:"Я из России. А вы?",b:"Mən Bakıdanam.",bRu:"Я из Баку."}},
+ {id:"xosgeldi",az:"Xoş gəlmisiniz",ru:"Добро пожаловать",kind:"формула",
+  note:"Скажут тебе, а не ты. Правильный ответ — çox sağ olun. Услышишь в каждом доме и почти в каждом заведении.",
+  scene:{who:"встречают гостя",a:"Xoş gəlmisiniz!",aRu:"Добро пожаловать!",b:"Çox sağ olun.",bRu:"Большое спасибо."}}
+]},
+{title:"Время и день",phrases:[
+ {id:"saatneche",az:"Saat neçədir?",ru:"Который час?",kind:"формула",
+  note:"Ответ строится так же просто: saat ikidir — два часа, saat beşdir — пять часов.",
+  scene:{who:"на улице",a:"Bağışlayın, saat neçədir?",aRu:"Извините, который час?",b:"Saat ikidir.",bRu:"Два часа."}},
+ {id:"sabahxeyir",az:"Sabahınız xeyir",ru:"Доброе утро",kind:"каркас",
+  frame:F(""," xeyir","Пожелай доброго вечера",["Sabahınız","Axşamınız","Gecəniz","Gün"],"Axşamınız","Axşamınız xeyir — добрый вечер"),
+  note:"Дословно «пусть ваше утро будет добрым». Вечерний вариант — axşamınız xeyir.",
+  scene:{who:"утром",a:"Sabahınız xeyir!",aRu:"Доброе утро!",b:"Sabahınız xeyir, necəsiniz?",bRu:"Доброе утро, как вы?"}},
+ {id:"gunaydin",az:"Gün aydın",ru:"Добрый день",kind:"формула",
+  note:"Дневное приветствие, дословно «день светлый». Короче и легче, чем длинные пожелания.",
+  scene:{who:"днём",a:"Gün aydın!",aRu:"Добрый день!",b:"Gün aydın!",bRu:"Добрый день!"}},
+ {id:"gorushenedek",az:"Görüşənədək",ru:"До свидания",kind:"формула",
+  note:"Официальное прощание, дословно «до того, как увидимся». Своим хватит görüşərik или hələlik.",
+  scene:{who:"прощаются",a:"Görüşənədək!",aRu:"До свидания!",b:"Sağ olun, görüşənədək.",bRu:"Всего доброго, до свидания."}}
+]}
+];
+var ALL=BLOCKS.reduce(function(acc,b){return acc.concat(b.phrases)},[]);
+function byId(id){for(var i=0;i<ALL.length;i++)if(ALL[i].id===id)return ALL[i]}
+
+/* ═══════ повторение ═══════ */
+var STEPS=[1,3,7,16,35];
+function day(){return Math.floor(Date.now()/864e5)}
+var S={sched:{},streak:0,lastDay:null,doneBlocks:[],voiceURI:null};
+function save(){try{localStorage.setItem("az.v2",JSON.stringify(S))}catch(e){}}
+function load(){
+  try{var r=JSON.parse(localStorage.getItem("az.v2"));if(r)for(var k in r)S[k]=r[k]}catch(e){}
+  var d=day();
+  if(S.lastDay!==d){
+    if(S.lastDay===null)S.streak=1;
+    else if(S.lastDay===d-1)S.streak=(S.streak||0)+1;
+    else S.streak=1;
+    S.lastDay=d;save();
+  }
+}
+function grade(id,right){
+  var c=S.sched[id]||{step:-1};
+  var step=right?Math.min(c.step+1,STEPS.length-1):0;
+  S.sched[id]={step:step,due:day()+STEPS[step]};save();
+}
+function dueIds(){var r=[];for(var i=0;i<ALL.length;i++){var p=ALL[i];if(S.sched[p.id]&&S.sched[p.id].due<=day())r.push(p.id)}return r}
+function learned(){var n=0;for(var i=0;i<ALL.length;i++)if(S.sched[ALL[i].id])n++;return n}
+function nextBlock(){for(var n=0;n<BLOCKS.length;n++)if(S.doneBlocks.indexOf(n)<0)return n;return null}
+
+/* ═══════ озвучка ═══════
+   Три режима. az — голос читает оригинал. tr — турецкая переделка.
+   ru — русский голос читает нашу транскрипцию, грубо, но узнаваемо. */
+function voices(){try{return speechSynthesis.getVoices()||[]}catch(e){return []}}
+function langOf(v){return (v.lang||"").toLowerCase().replace("_","-")}
+function modeFor(v){
+  var l=langOf(v);
+  if(l.indexOf("az")===0)return "az";
+  if(l.indexOf("tr")===0)return "tr";
+  if(l.indexOf("ru")===0)return "ru";
+  return "tr";
+}
+function resolveVoice(){
+  var list=voices();
+  if(!list.length)return {voice:null,mode:"none"};
+  if(S.voiceURI){
+    for(var i=0;i<list.length;i++)if(list[i].voiceURI===S.voiceURI)return {voice:list[i],mode:modeFor(list[i])};
+  }
+  for(var i=0;i<list.length;i++)if(langOf(list[i]).indexOf("az")===0)return {voice:list[i],mode:"az"};
+  for(var i=0;i<list.length;i++)if(langOf(list[i]).indexOf("tr")===0)return {voice:list[i],mode:"tr"};
+  for(var i=0;i<list.length;i++)if(langOf(list[i]).indexOf("ru")===0)return {voice:list[i],mode:"ru"};
+  return {voice:null,mode:"none"};
+}
+function forVoice(t,mode){
+  if(mode==="az")return t;
+  if(mode==="ru")return ruTr(t).replace(/́/g,"").replace(/æ/g,"э");
+  return toTurkish(t);
+}
+if(typeof speechSynthesis!=="undefined"&&speechSynthesis.addEventListener){
+  speechSynthesis.addEventListener("voiceschanged",function(){
+    if(V.tab==="ref"&&V.ref==="voice")render();
+  });
+}
+function say(t){
+  try{
+    speechSynthesis.cancel();
+    var r=resolveVoice();
+    var u=new SpeechSynthesisUtterance(forVoice(t,r.mode));
+    u.rate=.85;
+    if(r.voice){u.voice=r.voice;u.lang=r.voice.lang}else u.lang="tr-TR";
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* если запись есть — играем её, нет — отдаём синтезатору */
+var missing={};
+function playKey(key,text){
+  if(!key||missing[key])return say(text);
+  try{
+    var a=new Audio("audio/"+key+".mp3");
+    a.play()["catch"](function(){missing[key]=1;say(text)});
+    a.onerror=function(){missing[key]=1;say(text)};
+  }catch(e){say(text)}
+}
+
+/* ═══════ helpers ═══════ */
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function az(t,size,weight){
+  var inner=[];
+  var chars=String(t).split("");
+  for(var i=0;i<chars.length;i++){
+    var ch=chars[i],k=ch.toLowerCase();
+    inner.push(TRICKY[k]?'<span class="tricky" data-letter="'+k+'">'+esc(ch)+'</span>':esc(ch));
+  }
+  return '<span class="az" style="font-size:'+size+'px;font-weight:'+(weight||500)+'">'+inner.join("")+'</span>';
+}
+function play(t,key,b){
+  return '<button class="play'+(b?" big":"")+'" data-say="'+esc(t)+'"'+
+    (key?' data-audio="'+esc(key)+'"':'')+' aria-label="Прослушать">&#9834;</button>';
+}
+function shuffle(a){return a.map(function(v){return [Math.random(),v]}).sort(function(x,y){return x[0]-y[0]}).map(function(v){return v[1]})}
+function plural(n,a,b,c){var m=n%100,k=n%10;return (m>=11&&m<=14)?c:(k===1?a:((k>=2&&k<=4)?b:c))}
+
+/* ═══════ состояние ═══════ */
+var V={tab:"today",mode:"home",blk:null,li:0,scene:false,
+       quiz:[],qi:0,picked:null,built:[],shown:false,score:0,sheet:null,ref:"sounds"};
+
+function makeQuestion(p,isNew){
+  var types=[];
+  if(p.frame)types.push("slot");
+  if(p.az.split(/\s+/).length>=3)types.push("assemble");
+  types.push("listen");
+  if(!isNew)types.push("speak");
+  var type=types[Math.floor(Math.random()*types.length)];
+  if(type==="listen"){
+    var pool=[];for(var i=0;i<ALL.length;i++)if(ALL[i].ru!==p.ru)pool.push(ALL[i].ru);
+    var opts=shuffle([p.ru].concat(shuffle(pool).slice(0,3)));
+    return {type:type,p:p,options:opts,correct:opts.indexOf(p.ru)};
+  }
+  if(type==="assemble"){
+    var w=p.az.replace(/[,?!.]/g,"").split(/\s+/);
+    return {type:type,p:p,correct:w,words:shuffle(w.slice())};
+  }
+  if(type==="slot")return {type:type,p:p,correct:p.frame.options.indexOf(p.frame.answer)};
+  return {type:type,p:p};
+}
+function startSession(){
+  var nb=nextBlock();
+  var due=shuffle(dueIds()).slice(0,8);
+  V.blk=nb;V.li=0;V.scene=false;V.qi=0;V.score=0;V.picked=null;V.built=[];V.shown=false;
+  var items=[];
+  if(nb!==null){var bp=BLOCKS[nb].phrases;for(var i=0;i<bp.length;i++)items.push(makeQuestion(bp[i],true))}
+  for(var i=0;i<due.length;i++)items.push(makeQuestion(byId(due[i]),false));
+  V.quiz=shuffle(items);
+  V.mode=(nb!==null)?"learn":"quiz";
+  if(!V.quiz.length)V.mode="home";
+  render();
+}
+
+/* ═══════ экраны ═══════ */
+function viewHome(){
+  var nb=nextBlock(),due=dueIds().length;
+  var h='<div class="big">'+S.streak+'</div>'+
+   '<div class="mute" style="font-size:14px;margin-top:6px">'+plural(S.streak,"день подряд","дня подряд","дней подряд")+'</div>'+
+   '<div class="stat"><div><span style="font-size:24px">'+learned()+'</span><small>из '+ALL.length+' фраз</small></div>'+
+   '<div><span style="font-size:24px">'+due+'</span><small>на повторение</small></div></div>';
+  if(nb===null&&!due){
+    h+='<p style="font-size:16px;line-height:1.6">Всё пройдено, на сегодня повторять нечего. '+
+      'Возвращайся завтра — или загляни в прогон и проговори вслух.</p>'+
+      '<button class="btn" data-act="tab-run">Открыть прогон</button>'+
+      '<button class="btn dim" data-act="reset">Сбросить прогресс</button>';
+    return h;
+  }
+  if(nb!==null){
+    var names=[];for(var i=0;i<BLOCKS[nb].phrases.length;i++)names.push(esc(BLOCKS[nb].phrases[i].az));
+    h+='<div class="pill">новый блок</div><div style="font-size:19px;margin-bottom:6px">'+esc(BLOCKS[nb].title)+'</div>'+
+      '<div class="mute" style="font-size:14px;margin-bottom:20px">'+names.join(" · ")+'</div>';
+  }else{
+    h+='<p style="font-size:16px;line-height:1.6;margin-bottom:20px">Новые блоки закончились. '+
+      'Сегодня только повторение — '+due+' '+plural(due,"фраза","фразы","фраз")+'.</p>';
+  }
+  h+='<button class="btn gold" data-act="start">Заниматься</button>';
+  if(S.doneBlocks.length)h+='<button class="btn dim" data-act="reset">Сбросить прогресс</button>';
+  return h;
+}
+
+function viewLearn(){
+  var b=BLOCKS[V.blk],c=b.phrases[V.li];
+  var h='<div class="head"><span>'+esc(b.title)+'</span><span>'+(V.li+1)+' из '+b.phrases.length+'</span></div>';
+  h+='<div class="row">'+play(c.az,c.id)+'<div style="min-width:0">'+az(c.az,26)+
+     '<div class="tr" style="font-size:15px;margin-top:7px">'+esc(ruTr(c.az))+'</div></div></div>';
+  h+='<div style="font-size:19px;margin:18px 0 4px">'+esc(c.ru)+'</div>'+
+     '<div class="mute" style="font-size:12.5px;margin-bottom:16px">'+esc(c.kind)+'</div>'+
+     '<p class="note">'+esc(c.note)+'</p>';
+  if(!V.scene)h+='<button class="btn" data-act="scene">Показать сценку</button>';
+  else{
+    h+='<div class="card"><div class="mute" style="font-size:12.5px;margin-bottom:12px">'+esc(c.scene.who)+'</div>';
+    ["a","b"].forEach(function(k){
+      h+='<div class="row" style="margin-bottom:'+(k==="a"?13:0)+'px">'+play(c.scene[k],c.id+"-"+k)+
+        '<div style="min-width:0">'+az(c.scene[k],17,400)+
+        '<div class="tr" style="font-size:13.5px;margin-top:3px">'+esc(ruTr(c.scene[k]))+'</div>'+
+        '<div class="mute" style="font-size:14px;margin-top:3px">'+esc(c.scene[k+"Ru"])+'</div></div></div>';
+    });
+    h+='</div>';
+  }
+  h+='<button class="btn gold" style="margin-top:18px" data-act="lnext">'+
+     (V.li+1<b.phrases.length?"Дальше":"К закреплению")+'</button>';
+  return h;
+}
+
+function viewQuiz(){
+  if(V.qi>=V.quiz.length){
+    return '<div style="padding-top:16px">'+az("Əla!",34)+
+      '<p style="font-size:16px;margin:14px 0 6px">'+V.score+' из '+V.quiz.length+'</p>'+
+      '<p class="mute" style="font-size:14.5px;line-height:1.55;margin:0 0 22px">'+
+      'Что не далось — вернётся завтра, остальное позже.</p>'+
+      '<button class="btn" data-act="tab-run">Прогнать вслух</button>'+
+      '<button class="btn gold" data-act="home">На главную</button></div>';
+  }
+  var q=V.quiz[V.qi];
+  var h='<div class="head"><span>Занятие</span><span>'+(V.qi+1)+' из '+V.quiz.length+'</span></div>';
+
+  if(q.type==="listen"){
+    h+='<p style="font-size:16px;margin:0 0 20px">Послушай и выбери, что это значит</p>'+
+       '<div style="display:flex;justify-content:center;margin-bottom:24px">'+play(q.p.az,q.p.id,1)+'</div>';
+    q.options.forEach(function(o,n){var c="btn left";
+      if(V.picked!==null)c+=(n===q.correct?" ok":(n===V.picked?" bad":" dim"));
+      h+='<button class="'+c+'" data-pick="'+n+'">'+esc(o)+'</button>'});
+    if(V.picked!==null)h+='<div style="margin-top:20px">'+az(q.p.az,20)+
+      '<div class="tr" style="font-size:14px;margin-top:4px">'+esc(ruTr(q.p.az))+'</div></div>'+
+      '<button class="btn gold" style="margin-top:18px" data-next="'+(V.picked===q.correct?1:0)+'">Дальше</button>';
+    return h;
+  }
+  if(q.type==="speak"){
+    h+='<p style="font-size:18px;margin:0 0 10px">Скажи вслух: «'+esc(q.p.ru)+'»</p>'+
+       '<p class="mute" style="font-size:14px;margin:0 0 24px">Вслух, не про себя.</p>';
+    if(!V.shown)h+='<button class="btn gold" data-act="reveal">Проверить</button>';
+    else h+='<div class="row" style="align-items:center;margin-bottom:24px">'+play(q.p.az,q.p.id)+
+      '<div>'+az(q.p.az,22)+'<div class="tr" style="font-size:14.5px;margin-top:5px">'+esc(ruTr(q.p.az))+'</div></div></div>'+
+      '<div class="grid2"><button class="btn" data-next="0">Не смог</button>'+
+      '<button class="btn ok" data-next="1">Сказал</button></div>';
+    return h;
+  }
+  if(q.type==="assemble"){
+    var full=V.built.length===q.correct.length;
+    var right=full&&V.built.every(function(w,n){return w===q.correct[n]});
+    h+='<p style="font-size:17px;margin:0 0 20px">Собери: «'+esc(q.p.ru)+'»</p>'+
+       '<div class="drop'+(full?(right?" ok":" bad"):"")+'">';
+    if(!V.built.length)h+='<span class="mute" style="font-size:14px">Нажимай слова по порядку</span>';
+    V.built.forEach(function(w,n){h+='<button class="tile filled" data-unbuild="'+n+'">'+az(w,17,400)+'</button>'});
+    h+='</div><div class="tiles">';
+    var used={};V.built.forEach(function(w){used[w]=(used[w]||0)+1});
+    var seen={};
+    q.words.forEach(function(w){seen[w]=(seen[w]||0)+1;
+      if(seen[w]<=(used[w]||0))return;
+      h+='<button class="tile" data-build="'+esc(w)+'">'+az(w,17,400)+'</button>'});
+    h+='</div>';
+    if(full)h+='<div class="row" style="align-items:center;margin-top:20px">'+play(q.p.az,q.p.id)+
+      '<div>'+az(q.p.az,18)+'<div class="tr" style="font-size:13.5px;margin-top:3px">'+esc(ruTr(q.p.az))+'</div></div></div>'+
+      '<button class="btn gold" style="margin-top:18px" data-next="'+(right?1:0)+'">Дальше</button>';
+    return h;
+  }
+  var f=q.p.frame;
+  h+='<p style="font-size:17px;margin:0 0 20px">'+esc(f.task)+'</p>'+
+     '<div style="margin-bottom:22px;line-height:1.8">'+az(f.before||"",22)+
+     '<span style="display:inline-block;min-width:96px;text-align:center;margin:0 4px;border-bottom:2px solid '+
+     (V.picked===null?"var(--edge)":(V.picked===q.correct?"var(--ok)":"var(--warm)"))+'">'+
+     az(V.picked===null?" ":f.options[V.picked],22)+'</span>'+az(f.after||"",22)+'</div><div class="grid2">';
+  f.options.forEach(function(o,n){var c="btn";
+    if(V.picked!==null)c+=(n===q.correct?" ok":(n===V.picked?" bad":""));
+    h+='<button class="'+c+'" data-pick="'+n+'">'+az(o,17,400)+'</button>'});
+  h+='</div>';
+  if(V.picked!==null)h+='<div class="row" style="align-items:center;margin-top:20px">'+
+    play((f.before||"")+f.answer+(f.after||""),null)+'<span class="mute" style="font-size:14px">'+esc(f.gloss)+'</span></div>'+
+    '<button class="btn gold" style="margin-top:18px" data-next="'+(V.picked===q.correct?1:0)+'">Дальше</button>';
+  return h;
+}
+
+function viewRun(){
+  var h='<h2>Перед выходом</h2><p class="mute" style="font-size:14px;margin:0 0 18px;line-height:1.5">'+
+   'Без оценок и интервалов. Слушаешь, повторяешь вслух, идёшь.</p>';
+  BLOCKS.forEach(function(b){
+    h+='<div style="margin-bottom:20px"><div class="mute" style="font-size:13px;margin-bottom:4px">'+esc(b.title)+'</div>';
+    b.phrases.forEach(function(p){h+='<div class="item">'+play(p.az,p.id)+'<div style="min-width:0">'+az(p.az,17)+
+      '<div class="tr" style="font-size:13.5px;margin-top:2px">'+esc(ruTr(p.az))+'</div>'+
+      '<div class="mute" style="font-size:13.5px">'+esc(p.ru)+'</div></div></div>'});
+    h+='</div>';
+  });
+  return h;
+}
+
+function viewVoice(){
+  var list=voices(),cur=resolveVoice();
+  var MODES={az:"читает азербайджанский как есть",
+             tr:"турецкий голос, текст переделывается под него",
+             ru:"русский голос читает нашу транскрипцию",
+             none:"голосов не найдено"};
+  var h='<p class="mute" style="font-size:14px;margin:0 0 16px;line-height:1.55">'+
+   'Голоса берутся из системы, а не из приложения, поэтому набор зависит от браузера и телефона. '+
+   'Здесь ровно то, что видит этот браузер.</p>';
+  h+='<div class="card" style="margin-bottom:18px"><div style="font-size:15px;margin-bottom:4px">'+
+   (cur.voice?esc(cur.voice.name):"голос не выбран")+'</div>'+
+   '<div class="mute" style="font-size:13.5px">'+MODES[cur.mode]+'</div></div>';
+  if(!list.length){
+    h+='<p class="mute" style="font-size:14px;line-height:1.6">Браузер пока не отдал список. '+
+     'Нажми любую кнопку ♪ и вернись сюда — обычно после первого запуска голоса появляются.</p>';
+    return h;
+  }
+  function rank(v){var l=langOf(v);return l.indexOf("az")===0?0:(l.indexOf("tr")===0?1:(l.indexOf("ru")===0?2:3))}
+  var sorted=list.slice().sort(function(a,b){return rank(a)-rank(b)||langOf(a).localeCompare(langOf(b))});
+  h+='<div class="mute" style="font-size:13px;margin-bottom:6px">найдено голосов: '+list.length+'</div>';
+  sorted.forEach(function(v){
+    var on=cur.voice&&cur.voice.voiceURI===v.voiceURI;
+    var r=rank(v);
+    h+='<div class="item" style="justify-content:space-between">'+
+      '<div style="min-width:0;flex:1">'+
+      '<div style="font-size:14.5px;color:'+(r<3?"var(--text)":"var(--mute)")+'">'+esc(v.name)+
+      (on?' <span class="tr">· выбран</span>':'')+'</div>'+
+      '<div class="mute" style="font-size:12.5px;margin-top:2px">'+esc(v.lang)+
+      (r===0?" · азербайджанский":(r===1?" · турецкий":(r===2?" · русский":"")))+'</div></div>'+
+      '<button class="play" data-testvoice="'+esc(v.voiceURI)+'" aria-label="Проверить">&#9834;</button>'+
+      '<button class="tile" data-usevoice="'+esc(v.voiceURI)+'" style="font-size:13px;padding:7px 10px">Взять</button></div>';
+  });
+  if(S.voiceURI)h+='<button class="btn dim" style="margin-top:16px" data-act="autovoice">Выбрать автоматически</button>';
+  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 4 · 25 сентября</p>';
+  return h;
+}
+
+function viewRef(){
+  var h='<div class="seg">'+
+   '<button data-ref="sounds" class="'+(V.ref==="sounds"?"on":"")+'">Звуки</button>'+
+   '<button data-ref="harmony" class="'+(V.ref==="harmony"?"on":"")+'">Гармония</button>'+
+   '<button data-ref="frames" class="'+(V.ref==="frames"?"on":"")+'">Каркасы</button>'+
+   '<button data-ref="voice" class="'+(V.ref==="voice"?"on":"")+'">Голос</button></div>';
+  if(V.ref==="voice")return h+viewVoice();
+
+  if(V.ref==="sounds"){
+    h+='<p class="mute" style="font-size:14px;margin:0 0 20px;line-height:1.55">'+
+     'Русская запись эти пять передать не может — только рот.</p>';
+    var keys=Object.keys(TRICKY);
+    keys.forEach(function(k,n){
+      h+='<div style="display:flex;gap:16px;padding:16px 0;'+(n?"border-top:1px solid var(--edge)":"")+'">'+
+      '<div style="width:34px;flex:0 0 auto">'+az(k,30)+'</div>'+
+      '<p style="margin:0;font-size:14.5px;line-height:1.55">'+esc(TRICKY[k])+'</p></div>';
+    });
+    h+='<div class="card mute" style="margin-top:20px;font-size:14px;line-height:1.55">'+
+     'Чего транскрипция не покажет: x и h обе пишутся как «х», хотя это разные звуки — x жёсткий, '+
+     'как в «ухо», h лёгкий, как выдох. И на конце слова звонкие оглушаются: kitab звучит '+
+     'как «китап», papaq — как «папах».</div>';
+    return h;
+  }
+  if(V.ref==="harmony"){
+    h+='<p style="font-size:14.5px;line-height:1.6;margin:0 0 20px">'+
+     'Гласные корня решают, какой суффикс к нему прилипнет. Смотришь на последнюю гласную — остальное следует за ней.</p>';
+    [["Задний ряд","a, ı, o, u","-da","-ım / -um","var(--warm)"],
+     ["Передний ряд","e, ə, i, ö, ü","-də","-im / -üm","var(--accent)"]].forEach(function(r){
+      h+='<div style="border-left:2px solid '+r[4]+';padding-left:14px;margin-bottom:20px">'+
+      '<div style="font-size:15px;margin-bottom:6px">'+r[0]+'</div>'+
+      '<div style="color:'+r[4]+';margin-bottom:8px">'+az(r[1],19)+'</div>'+
+      '<div class="mute" style="font-size:14px">где — '+r[2]+' · мой — '+r[3]+'</div></div>';
+    });
+    h+='<p class="mute" style="font-size:14px;line-height:1.6">'+
+     'Между -ım и -um выбираешь по огублению: после o и u идёт -um, после a и ı — -ım. '+
+     'С передним рядом так же: после ö и ü — -üm, после e, ə, i — -im.</p>'+
+     '<div class="card" style="margin-top:18px;line-height:2">'+
+     az("ev → evim, evdə",16)+'<br>'+az("kitab → kitabım, kitabda",16)+'<br>'+az("göz → gözüm, gözdə",16)+'</div>';
+    return h;
+  }
+  h+='<p class="mute" style="font-size:14px;margin:0 0 18px;line-height:1.55">'+
+   'Каркас — фраза с дыркой. Выучиваешь раз, дальше подставляешь любое слово.</p>';
+  ALL.filter(function(p){return p.frame}).forEach(function(p){
+    h+='<div style="padding:13px 0;border-top:1px solid var(--edge)">'+
+    az((p.frame.before||"")+"…"+(p.frame.after||""),18)+
+    '<div class="mute" style="font-size:13.5px;margin-top:5px">'+esc(p.frame.options.join(", "))+'</div></div>';
+  });
+  h+='<p class="mute" style="font-size:14px;line-height:1.6;margin-top:18px">'+
+   'Ударение почти всегда на последнем слоге и переезжает на конец вместе с суффиксом. '+
+   'Заимствования вроде professor его не отдают — такие слова запоминаются отдельно.</p>';
+  return h;
+}
+
+/* ═══════ отрисовка ═══════ */
+function render(){
+  var a=document.getElementById("app");
+  if(V.tab==="today")a.innerHTML=(V.mode==="home")?viewHome():((V.mode==="learn")?viewLearn():viewQuiz());
+  else if(V.tab==="run")a.innerHTML=viewRun();
+  else a.innerHTML=viewRef();
+  document.getElementById("nav").innerHTML=[["today","Сегодня"],["run","Прогон"],["ref","Справочник"]]
+    .map(function(x){return '<button data-tab="'+x[0]+'" class="'+(V.tab===x[0]?"on":"")+'">'+x[1]+'</button>'}).join("");
+  var old=document.getElementById("sheet");if(old)old.parentNode.removeChild(old);
+  if(V.sheet){
+    var d=document.createElement("div");d.className="sheet";d.id="sheet";
+    d.innerHTML='<div>'+az(V.sheet,40)+
+      '<p style="font-size:15.5px;line-height:1.6;margin:12px 0 20px">'+esc(TRICKY[V.sheet])+'</p>'+
+      '<button class="btn dim" data-act="closesheet">Понятно</button></div>';
+    document.body.appendChild(d);
+  }
+}
+
+/* ═══════ события ═══════ */
+document.addEventListener("click",function(e){
+  var t=e.target.closest("[data-say],[data-tab],[data-act],[data-pick],[data-next],[data-build],[data-unbuild],[data-ref],[data-letter],[data-testvoice],[data-usevoice]");
+  if(!t)return;var d=t.dataset;
+  if(d.say!==undefined){playKey(d.audio,d.say);return}
+  if(d.testvoice!==undefined){
+    var list=voices(),v=null;for(var i=0;i<list.length;i++)if(list[i].voiceURI===d.testvoice)v=list[i];
+    if(v){try{speechSynthesis.cancel();
+      var u=new SpeechSynthesisUtterance(forVoice("Çox sağ olun",modeFor(v)));
+      u.voice=v;u.lang=v.lang;u.rate=.85;speechSynthesis.speak(u)}catch(e){}}
+    return}
+  if(d.usevoice!==undefined){S.voiceURI=d.usevoice;save();render();return}
+  if(d.act==="autovoice"){S.voiceURI=null;save();render();return}
+  if(d.letter!==undefined){V.sheet=d.letter;render();return}
+  if(d.act==="closesheet"){V.sheet=null;render();return}
+  if(d.tab){V.tab=d.tab;V.sheet=null;render();return}
+  if(d.ref){V.ref=d.ref;render();return}
+  if(d.act==="tab-run"){V.tab="run";render();return}
+  if(d.act==="home"){V.tab="today";V.mode="home";render();return}
+  if(d.act==="start"){startSession();return}
+  if(d.act==="reset"){
+    if(confirm("Стереть весь прогресс и начать сначала?")){
+      S={sched:{},streak:1,lastDay:day(),doneBlocks:[],voiceURI:S.voiceURI};save();V.mode="home";render()}
+    return}
+  if(d.act==="scene"){V.scene=true;render();return}
+  if(d.act==="lnext"){
+    var b=BLOCKS[V.blk];
+    if(V.li+1<b.phrases.length){V.li++;V.scene=false}
+    else{if(S.doneBlocks.indexOf(V.blk)<0){S.doneBlocks.push(V.blk);save()}V.mode="quiz"}
+    render();return}
+  if(d.act==="reveal"){V.shown=true;render();return}
+  if(d.pick!==undefined&&V.picked===null){V.picked=+d.pick;render();return}
+  if(d.build!==undefined){V.built.push(d.build);render();return}
+  if(d.unbuild!==undefined){V.built.splice(+d.unbuild,1);render();return}
+  if(d.next!==undefined){
+    var q=V.quiz[V.qi];grade(q.p.id,d.next==="1");
+    if(d.next==="1")V.score++;
+    V.qi++;V.picked=null;V.built=[];V.shown=false;render();return}
+});
+
+load();render();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js")["catch"](function(){});
+</script>
+</body>
+</html>
