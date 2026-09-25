@@ -262,6 +262,64 @@ var BLOCKS=[
  {id:"gorushenedek",az:"Görüşənədək",ru:"До свидания",kind:"формула",
   note:"Официальное прощание, дословно «до того, как увидимся». Своим хватит görüşərik или hələlik.",
   scene:{who:"прощаются",a:"Görüşənədək!",aRu:"До свидания!",b:"Sağ olun, görüşənədək.",bRu:"Всего доброго, до свидания."}}
+]},
+{title:"В магазине",phrases:[
+ {id:"bahadir",az:"Çox bahadır",ru:"Очень дорого",kind:"формула",
+  note:"Baha — «дорогой», -dır — связка «есть». Противоположность — ucuz, «дешёвый»: ucuzdur — «дёшево».",
+  scene:{who:"на рынке",a:"Bu, on manatdır.",aRu:"Это десять манат.",b:"Çox bahadır.",bRu:"Очень дорого."}},
+ {id:"endirim",az:"Endirim var?",ru:"Скидка есть?",kind:"формула",
+  note:"Тот же каркас var, что и с чаем или кофе — endirim просто ещё одно слово в этой конструкции.",
+  scene:{who:"на рынке",a:"Endirim var?",aRu:"Скидка есть?",b:"Bəli, beş faiz.",bRu:"Да, пять процентов."}},
+ {id:"rengvar",az:"Başqa rəngi var?",ru:"Другой цвет есть?",kind:"формула",
+  note:"Başqa — «другой», rəng — «цвет». Полезно в любом магазине одежды.",
+  scene:{who:"в магазине одежды",a:"Başqa rəngi var?",aRu:"Другой цвет есть?",b:"Bəli, ağ və qara var.",bRu:"Да, есть белый и чёрный."}},
+ {id:"kartodeme",az:"Kart ilə ödəyə bilərəm?",ru:"Могу заплатить картой?",kind:"формула",
+  note:"Ödəmək — «платить», bilərəm — «смогу». Наличные в Баку тоже примут почти везде, но спросить не помешает.",
+  scene:{who:"на кассе",a:"Kart ilə ödəyə bilərəm?",aRu:"Могу заплатить картой?",b:"Bəli, buyurun.",bRu:"Да, пожалуйста."}}
+]},
+{title:"Такси",phrases:[
+ {id:"buraya",az:"Buraya, zəhmət olmasa",ru:"Сюда, пожалуйста",kind:"формула",
+  note:"Buraya — «сюда» (дательный падеж от bura). Так говорят, показывая точку на карте или адрес водителю.",
+  scene:{who:"в такси",a:"Hara gedirsiniz?",aRu:"Куда едете?",b:"Buraya, zəhmət olmasa.",bRu:"Сюда, пожалуйста."}},
+ {id:"neqederaparir",az:"Nə qədər vaxt aparır?",ru:"Сколько времени займёт?",kind:"формула",
+  note:"Nə qədər — «сколько», vaxt aparır — дословно «время уносит». Стандартный вопрос про дорогу.",
+  scene:{who:"в такси",a:"Nə qədər vaxt aparır?",aRu:"Сколько времени займёт?",b:"Təxminən iyirmi dəqiqə.",bRu:"Примерно двадцать минут."}},
+ {id:"dayanin",az:"Burada dayanın, zəhmət olmasa",ru:"Остановите здесь, пожалуйста",kind:"формула",
+  note:"Dayanın — повелительная форма «остановитесь». Burada — «здесь».",
+  scene:{who:"в такси",a:"Burada dayanın, zəhmət olmasa.",aRu:"Остановите здесь, пожалуйста.",b:"Oldu.",bRu:"Хорошо."}},
+ {id:"havalimanina",az:"Hava limanına, zəhmət olmasa",ru:"В аэропорт, пожалуйста",kind:"каркас",
+  frame:F(""," , zəhmət olmasa","Скажи «На вокзал, пожалуйста»",["Hava limanına","Vağzala","Mərkəzə","Otelə"],"Vağzala","vağzala — на вокзал"),
+  note:"Hava limanı — дословно «воздушный порт», то есть аэропорт. При обращении в падеже -ı превращается в -ına.",
+  scene:{who:"садится в такси",a:"Hava limanına, zəhmət olmasa.",aRu:"В аэропорт, пожалуйста.",b:"Buyurun, əyləşin.",bRu:"Пожалуйста, садитесь."}}
+]},
+{title:"Я иду, ты идёшь",phrases:[
+ {id:"gedirem",az:"Mən gedirəm",ru:"Я иду / еду",kind:"формула",
+  note:"Настоящее время строится через -ir/-ır/-ur/-ür (по гармонии) плюс личное окончание: gedirəm — я иду, gedirsən — ты идёшь. У глагола getmək корень get- перед этим суффиксом превращается в ged-.",
+  scene:{who:"прощание",a:"Sən hara gedirsən?",aRu:"Ты куда идёшь?",b:"Mən evə gedirəm.",bRu:"Я иду домой."}},
+ {id:"haragedirsen",az:"Sən hara gedirsən?",ru:"Ты куда идёшь?",kind:"формула",
+  note:"Та же модель, что и gedirəm, только окончание -sən — «ты».",
+  scene:{who:"на улице",a:"Salam! Sən hara gedirsən?",aRu:"Привет! Ты куда идёшь?",b:"Bazara gedirəm.",bRu:"На рынок иду."}},
+ {id:"restoranagedirik",az:"Biz restorana gedirik",ru:"Мы идём в ресторан",kind:"каркас",
+  frame:F("Biz "," gedirik","Скажи «Мы идём в парк»",["restorana","bağa","evə","bazara"],"bağa","bağa — в парк"),
+  note:"Окончание -ik — «мы». Restorana — «в ресторан», дательный падеж.",
+  scene:{who:"компания друзей",a:"Bu axşam nə edirik?",aRu:"Что мы делаем сегодня вечером?",b:"Biz restorana gedirik.",bRu:"Мы идём в ресторан."}},
+ {id:"indigelirem",az:"İndi gəlirəm",ru:"Уже иду",kind:"формула",
+  note:"Устойчивая фраза-ответ, когда тебя зовут — «уже иду, сейчас буду».",
+  scene:{who:"зовут из другой комнаты",a:"Hardasan? Gəl!",aRu:"Ты где? Иди сюда!",b:"İndi gəlirəm!",bRu:"Уже иду!"}}
+]},
+{title:"Было — прошедшее время",phrases:[
+ {id:"geldim",az:"Mən gəldim",ru:"Я пришёл / приехал",kind:"формула",
+  note:"Прошедшее время — суффикс -dı/-di/-du/-dü (с тем же оглушением, что и в конце слов) плюс личное окончание: gəldim — я пришёл.",
+  scene:{who:"встреча в аэропорту",a:"Nə vaxt gəldin?",aRu:"Когда ты приехал?",b:"İndicə gəldim.",bRu:"Только что приехал."}},
+ {id:"haradaydin",az:"Haradaydın?",ru:"Ты где был?",kind:"формула",
+  note:"Слитная разговорная форма от harada + idin. Idi — это прошедшее время связки «быть»: idim — я был, idin — ты был, idi — он был.",
+  scene:{who:"звонок другу",a:"Haradaydın? Axtardım səni.",aRu:"Ты где был? Я тебя искал.",b:"Bağışla, məşğul idim.",bRu:"Извини, был занят."}},
+ {id:"bilmirdim",az:"Bunu bilmirdim",ru:"Я этого не знал",kind:"формула",
+  note:"Bilmirdim — отрицательное прошедшее от bilmək («знать»): bil + mir (не) + di (прошедшее) + m (я).",
+  scene:{who:"узнал новость",a:"Sabah bayramdır, bilirdin?",aRu:"Завтра праздник, ты знал?",b:"Yox, bunu bilmirdim.",bRu:"Нет, я этого не знал."}},
+ {id:"xosumagedli",az:"Çox xoşuma gəldi",ru:"Мне очень понравилось",kind:"формула",
+  note:"Дословно «очень пришло по моему вкусу». Прошедшее время от xoşuma gəlmək — «нравиться».",
+  scene:{who:"после ужина",a:"Necə idi?",aRu:"Как было?",b:"Çox xoşuma gəldi!",bRu:"Мне очень понравилось!"}}
 ]}
 ];
 var ALL=BLOCKS.reduce(function(acc,b){return acc.concat(b.phrases)},[]);
@@ -637,7 +695,7 @@ function viewVoice(){
       '<button class="tile" data-usevoice="'+esc(v.voiceURI)+'" style="font-size:13px;padding:7px 10px">Взять</button></div>';
   });
   if(S.voiceURI)h+='<button class="btn dim" style="margin-top:16px" data-act="autovoice">Выбрать автоматически</button>';
-  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 5 · 25 сентября</p>';
+  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 6 · 25 сентября</p>';
   return h;
 }
 
