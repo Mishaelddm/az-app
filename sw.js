@@ -1,4 +1,4 @@
-var CACHE = "az-v4";
+var CACHE = "az-v5";
 var CORE = ["./", "index.html", "manifest.webmanifest", "icon.png"];
 
 self.addEventListener("install", function (e) {

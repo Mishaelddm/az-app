@@ -366,7 +366,33 @@ function plural(n,a,b,c){var m=n%100,k=n%10;return (m>=11&&m<=14)?c:(k===1?a:((k
 
 /* ═══════ состояние ═══════ */
 var V={tab:"today",mode:"home",blk:null,li:0,scene:false,
-       quiz:[],qi:0,picked:null,built:[],shown:false,score:0,sheet:null,ref:"sounds"};
+       quiz:[],qi:0,picked:null,built:[],shown:false,score:0,sheet:null,ref:"sounds",
+       reviewBlk:null,reviewLi:0,reviewScene:false};
+
+/* ═══════ история / кнопка «назад» ═══════ */
+var HIST_KEY=null, historyInited=false, suppressPush=false;
+function navSnapshot(){return {tab:V.tab,mode:V.mode,reviewBlk:V.reviewBlk,sheet:V.sheet}}
+function pushNav(){
+  var snap=navSnapshot(), key=JSON.stringify(snap);
+  if(suppressPush){HIST_KEY=key;return}
+  if(key===HIST_KEY)return;
+  HIST_KEY=key;
+  if(!historyInited){historyInited=true;history.replaceState(snap,"")}
+  else history.pushState(snap,"");
+}
+window.addEventListener("popstate",function(e){
+  if(V.tab==="today"&&V.mode==="quiz"&&V.quiz.length&&V.qi>0&&V.qi<V.quiz.length){
+    if(!confirm("Прогресс в этом занятии не сохранится. Выйти назад?")){
+      var snap=navSnapshot();HIST_KEY=JSON.stringify(snap);history.pushState(snap,"");return;
+    }
+  }
+  suppressPush=true;
+  var st=e.state;
+  if(st){V.tab=st.tab;V.mode=st.mode;V.reviewBlk=st.reviewBlk;V.sheet=st.sheet}
+  else{V.tab="today";V.mode="home";V.sheet=null}
+  render();
+  suppressPush=false;
+});
 
 function makeQuestion(p,isNew){
   var types=[];
@@ -519,6 +545,52 @@ function viewQuiz(){
   return h;
 }
 
+function viewLessons(){
+  var curIdx=nextBlock();
+  var h='<h2>Уроки</h2><p class="mute" style="font-size:14px;margin:0 0 18px;line-height:1.5">'+
+   'Пройденные блоки можно открыть заново — без теста и без влияния на повторения.</p>';
+  BLOCKS.forEach(function(b,i){
+    var done=S.doneBlocks.indexOf(i)>=0;
+    var cur=(!done)&&i===curIdx;
+    var locked=!done&&!cur;
+    var right;
+    if(done)right='<span class="tr" style="font-size:13px">Повторить</span>';
+    else if(cur)right='<span class="mute" style="font-size:13px">→ сегодня</span>';
+    else right='<span class="mute" style="font-size:17px">🔒</span>';
+    h+='<div class="item" style="justify-content:space-between;cursor:pointer;'+(locked?"opacity:.45":"")+'"'+
+      (done?' data-act="reviewblock" data-blk="'+i+'"':(cur?' data-act="gotoday"':''))+'>'+
+      '<div><div style="font-size:15.5px">'+esc(b.title)+'</div>'+
+      '<div class="mute" style="font-size:12.5px;margin-top:2px">'+b.phrases.length+' '+plural(b.phrases.length,"фраза","фразы","фраз")+'</div></div>'+
+      right+'</div>';
+  });
+  return h;
+}
+
+function viewLessonReview(){
+  var b=BLOCKS[V.reviewBlk],c=b.phrases[V.reviewLi];
+  var h='<div class="head"><span>'+esc(b.title)+' · повтор</span><span>'+(V.reviewLi+1)+' из '+b.phrases.length+'</span></div>';
+  h+='<div class="row">'+play(c.az,c.id)+'<div style="min-width:0">'+az(c.az,26)+
+     '<div class="tr" style="font-size:15px;margin-top:7px">'+esc(ruTr(c.az))+'</div></div></div>';
+  h+='<div style="font-size:19px;margin:18px 0 4px">'+esc(c.ru)+'</div>'+
+     '<div class="mute" style="font-size:12.5px;margin-bottom:16px">'+esc(c.kind)+'</div>'+
+     '<p class="note">'+esc(c.note)+'</p>';
+  if(!V.reviewScene)h+='<button class="btn" data-act="reviewscene">Показать сценку</button>';
+  else{
+    h+='<div class="card"><div class="mute" style="font-size:12.5px;margin-bottom:12px">'+esc(c.scene.who)+'</div>';
+    ["a","b"].forEach(function(k){
+      h+='<div class="row" style="margin-bottom:'+(k==="a"?13:0)+'px">'+play(c.scene[k],c.id+"-"+k)+
+        '<div style="min-width:0">'+az(c.scene[k],17,400)+
+        '<div class="tr" style="font-size:13.5px;margin-top:3px">'+esc(ruTr(c.scene[k]))+'</div>'+
+        '<div class="mute" style="font-size:14px;margin-top:3px">'+esc(c.scene[k+"Ru"])+'</div></div></div>';
+    });
+    h+='</div>';
+  }
+  h+='<div class="grid2" style="margin-top:18px">'+
+     '<button class="btn dim" data-act="reviewexit">К списку</button>'+
+     '<button class="btn gold" data-act="reviewnext">'+(V.reviewLi+1<b.phrases.length?"Дальше":"Готово")+'</button></div>';
+  return h;
+}
+
 function viewRun(){
   var h='<h2>Перед выходом</h2><p class="mute" style="font-size:14px;margin:0 0 18px;line-height:1.5">'+
    'Без оценок и интервалов. Слушаешь, повторяешь вслух, идёшь.</p>';
@@ -565,7 +637,7 @@ function viewVoice(){
       '<button class="tile" data-usevoice="'+esc(v.voiceURI)+'" style="font-size:13px;padding:7px 10px">Взять</button></div>';
   });
   if(S.voiceURI)h+='<button class="btn dim" style="margin-top:16px" data-act="autovoice">Выбрать автоматически</button>';
-  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 4 · 25 сентября</p>';
+  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 5 · 25 сентября</p>';
   return h;
 }
 
@@ -627,8 +699,9 @@ function render(){
   var a=document.getElementById("app");
   if(V.tab==="today")a.innerHTML=(V.mode==="home")?viewHome():((V.mode==="learn")?viewLearn():viewQuiz());
   else if(V.tab==="run")a.innerHTML=viewRun();
+  else if(V.tab==="lessons")a.innerHTML=(V.reviewBlk!==null)?viewLessonReview():viewLessons();
   else a.innerHTML=viewRef();
-  document.getElementById("nav").innerHTML=[["today","Сегодня"],["run","Прогон"],["ref","Справочник"]]
+  document.getElementById("nav").innerHTML=[["today","Сегодня"],["run","Прогон"],["lessons","Уроки"],["ref","Справочник"]]
     .map(function(x){return '<button data-tab="'+x[0]+'" class="'+(V.tab===x[0]?"on":"")+'">'+x[1]+'</button>'}).join("");
   var old=document.getElementById("sheet");if(old)old.parentNode.removeChild(old);
   if(V.sheet){
@@ -638,6 +711,7 @@ function render(){
       '<button class="btn dim" data-act="closesheet">Понятно</button></div>';
     document.body.appendChild(d);
   }
+  pushNav();
 }
 
 /* ═══════ события ═══════ */
@@ -659,6 +733,15 @@ document.addEventListener("click",function(e){
   if(d.ref){V.ref=d.ref;render();return}
   if(d.act==="tab-run"){V.tab="run";render();return}
   if(d.act==="home"){V.tab="today";V.mode="home";render();return}
+  if(d.act==="gotoday"){V.tab="today";render();return}
+  if(d.act==="reviewblock"){V.reviewBlk=+d.blk;V.reviewLi=0;V.reviewScene=false;render();return}
+  if(d.act==="reviewscene"){V.reviewScene=true;render();return}
+  if(d.act==="reviewexit"){V.reviewBlk=null;render();return}
+  if(d.act==="reviewnext"){
+    var rb=BLOCKS[V.reviewBlk];
+    if(V.reviewLi+1<rb.phrases.length){V.reviewLi++;V.reviewScene=false}
+    else V.reviewBlk=null;
+    render();return}
   if(d.act==="start"){startSession();return}
   if(d.act==="reset"){
     if(confirm("Стереть весь прогресс и начать сначала?")){
