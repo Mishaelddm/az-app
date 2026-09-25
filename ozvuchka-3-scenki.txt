@@ -1,7 +1,7 @@
 Salam, necəsən?
 Çox sağ olun.
 Buyurun.
-Bəli, bilirəm.
+Yox, bilmirəm.
 Sağ ol, yaxşıyam.
 Yaxşıyam, çox sağ olun. Siz necəsiniz?
 Hər şey yaxşıdır.
@@ -12,12 +12,12 @@ Bağışlayın, indi gətirərik.
 Bəli, var.
 Buyurun.
 Bu düşbərədir.
-Buyurun.
+Buyurun, nuş olsun.
 Çox dadlıdır!
 Üç nəfər.
 On manat.
 Beş manat.
-Beş manat.
+İki manat.
 Bir çay istəyirəm.
 Bunu? Buyurun.
 Yox, sağ ol, istəmirəm.
