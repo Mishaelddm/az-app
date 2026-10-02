@@ -429,6 +429,22 @@ var V={tab:"today",mode:"home",blk:null,li:0,scene:false,
        trDir:"ru-az",trIn:"",trOut:null,trErr:null,trBusy:false};
 
 /* ═══════ переводчик ═══════ */
+function pickBestTranslation(data,srcText){
+  var fallback=(data&&data.responseData&&data.responseData.translatedText)?data.responseData.translatedText:null;
+  var list=(data&&data.matches)?data.matches.slice():[];
+  if(!list.length)return fallback;
+  var srcWords=Math.max(1,srcText.trim().split(/\s+/).length);
+  var good=list.filter(function(m){
+    var by=String(m["created-by"]||"").toLowerCase();
+    if(by.indexOf("public web")>=0)return false; // шумный источник, часто врёт
+    var outWords=String(m.translation||"").trim().split(/\s+/).length;
+    if(outWords>srcWords*3+4)return false; // перевод в разы длиннее исходника — подозрительно
+    return true;
+  });
+  var pool=good.length?good:list;
+  pool.sort(function(a,b){return (parseFloat(b.quality)||0)-(parseFloat(a.quality)||0)});
+  return pool[0]&&pool[0].translation ? pool[0].translation : fallback;
+}
 function doTranslate(){
   var ta=document.getElementById("trIn");
   var text=(ta?ta.value:"").trim();
@@ -438,8 +454,9 @@ function doTranslate(){
   var url="https://api.mymemory.translated.net/get?q="+encodeURIComponent(text)+"&langpair="+pair;
   fetch(url).then(function(r){return r.json()}).then(function(data){
     V.trBusy=false;
-    if(data&&data.responseData&&data.responseData.translatedText){
-      V.trOut=data.responseData.translatedText;
+    var best=pickBestTranslation(data,text);
+    if(best){
+      V.trOut=best;
     }else{
       V.trErr="Не получилось перевести — попробуй ещё раз.";
     }
@@ -717,7 +734,7 @@ function viewVoice(){
       '<button class="tile" data-usevoice="'+esc(v.voiceURI)+'" style="font-size:13px;padding:7px 10px">Взять</button></div>';
   });
   if(S.voiceURI)h+='<button class="btn dim" style="margin-top:16px" data-act="autovoice">Выбрать автоматически</button>';
-  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 7 · 2 октября</p>';
+  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 8 · 2 октября</p>';
   return h;
 }
 
