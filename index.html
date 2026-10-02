@@ -425,7 +425,29 @@ function plural(n,a,b,c){var m=n%100,k=n%10;return (m>=11&&m<=14)?c:(k===1?a:((k
 /* ═══════ состояние ═══════ */
 var V={tab:"today",mode:"home",blk:null,li:0,scene:false,
        quiz:[],qi:0,picked:null,built:[],shown:false,score:0,sheet:null,ref:"sounds",
-       reviewBlk:null,reviewLi:0,reviewScene:false};
+       reviewBlk:null,reviewLi:0,reviewScene:false,
+       trDir:"ru-az",trIn:"",trOut:null,trErr:null,trBusy:false};
+
+/* ═══════ переводчик ═══════ */
+function doTranslate(){
+  var ta=document.getElementById("trIn");
+  var text=(ta?ta.value:"").trim();
+  if(!text)return;
+  V.trIn=text;V.trErr=null;V.trBusy=true;V.trOut=null;render();
+  var pair=(V.trDir==="az-ru")?"az|ru":"ru|az";
+  var url="https://api.mymemory.translated.net/get?q="+encodeURIComponent(text)+"&langpair="+pair;
+  fetch(url).then(function(r){return r.json()}).then(function(data){
+    V.trBusy=false;
+    if(data&&data.responseData&&data.responseData.translatedText){
+      V.trOut=data.responseData.translatedText;
+    }else{
+      V.trErr="Не получилось перевести — попробуй ещё раз.";
+    }
+    render();
+  })["catch"](function(){
+    V.trBusy=false;V.trErr="Нет связи с переводчиком — нужен интернет.";render();
+  });
+}
 
 /* ═══════ история / кнопка «назад» ═══════ */
 var HIST_KEY=null, historyInited=false, suppressPush=false;
@@ -695,7 +717,28 @@ function viewVoice(){
       '<button class="tile" data-usevoice="'+esc(v.voiceURI)+'" style="font-size:13px;padding:7px 10px">Взять</button></div>';
   });
   if(S.voiceURI)h+='<button class="btn dim" style="margin-top:16px" data-act="autovoice">Выбрать автоматически</button>';
-  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 6 · 25 сентября</p>';
+  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 7 · 2 октября</p>';
+  return h;
+}
+
+function viewTranslate(){
+  var isRuAz=V.trDir!=="az-ru";
+  var fromLabel=isRuAz?"Русский":"Azərbaycan", toLabel=isRuAz?"Azərbaycan":"Русский";
+  var h='<p class="mute" style="font-size:14px;margin:0 0 16px;line-height:1.5">'+
+   'Машинный перевод для разовых фраз, которых нет в карточках. Нужен интернет.</p>';
+  h+='<button class="btn dim" style="margin-bottom:14px" data-act="trswap">'+esc(fromLabel)+' → '+esc(toLabel)+'  ⇄</button>';
+  h+='<textarea id="trIn" rows="3" style="width:100%;background:var(--surface);color:var(--text);'+
+   'border:1px solid var(--edge);border-radius:10px;padding:12px;font-size:15px;font-family:inherit;'+
+   'margin-bottom:10px;resize:vertical" placeholder="Введи текст…">'+esc(V.trIn||"")+'</textarea>';
+  h+='<button class="btn gold" data-act="translate"'+(V.trBusy?" disabled":"")+'>'+(V.trBusy?"Перевожу…":"Перевести")+'</button>';
+  if(V.trErr)h+='<p style="color:var(--warm);font-size:13.5px;margin-top:12px">'+esc(V.trErr)+'</p>';
+  if(V.trOut){
+    h+='<div class="card" style="margin-top:16px">';
+    if(isRuAz)h+='<div class="row">'+play(V.trOut,null)+'<div style="min-width:0">'+az(V.trOut,20)+
+      '<div class="tr" style="font-size:14px;margin-top:6px">'+esc(ruTr(V.trOut))+'</div></div></div>';
+    else h+='<div style="font-size:17px">'+esc(V.trOut)+'</div>';
+    h+='</div>';
+  }
   return h;
 }
 
@@ -704,8 +747,10 @@ function viewRef(){
    '<button data-ref="sounds" class="'+(V.ref==="sounds"?"on":"")+'">Звуки</button>'+
    '<button data-ref="harmony" class="'+(V.ref==="harmony"?"on":"")+'">Гармония</button>'+
    '<button data-ref="frames" class="'+(V.ref==="frames"?"on":"")+'">Каркасы</button>'+
+   '<button data-ref="translate" class="'+(V.ref==="translate"?"on":"")+'">Перевод</button>'+
    '<button data-ref="voice" class="'+(V.ref==="voice"?"on":"")+'">Голос</button></div>';
   if(V.ref==="voice")return h+viewVoice();
+  if(V.ref==="translate")return h+viewTranslate();
 
   if(V.ref==="sounds"){
     h+='<p class="mute" style="font-size:14px;margin:0 0 20px;line-height:1.55">'+
@@ -789,6 +834,8 @@ document.addEventListener("click",function(e){
   if(d.act==="closesheet"){V.sheet=null;render();return}
   if(d.tab){V.tab=d.tab;V.sheet=null;render();return}
   if(d.ref){V.ref=d.ref;render();return}
+  if(d.act==="trswap"){V.trDir=(V.trDir==="az-ru")?"ru-az":"az-ru";V.trOut=null;V.trErr=null;render();return}
+  if(d.act==="translate"){doTranslate();return}
   if(d.act==="tab-run"){V.tab="run";render();return}
   if(d.act==="home"){V.tab="today";V.mode="home";render();return}
   if(d.act==="gotoday"){V.tab="today";render();return}
