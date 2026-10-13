@@ -442,7 +442,14 @@ function pickBestTranslation(data,srcText){
     return true;
   });
   var pool=good.length?good:list;
-  pool.sort(function(a,b){return (parseFloat(b.quality)||0)-(parseFloat(a.quality)||0)});
+  function norm(t){return String(t||"").toLowerCase().replace(/[\s\.,!?;:"'«»\-]+/g," ").trim()}
+  var ns=norm(srcText);
+  var exact=pool.filter(function(m){return norm(m.segment)===ns}); // только записи, где исходник совпал целиком, а не похожая фраза
+  if(exact.length)pool=exact;
+  pool.sort(function(a,b){
+    var d=(parseFloat(b.match)||0)-(parseFloat(a.match)||0);
+    if(Math.abs(d)>0.02)return d;
+    return (parseFloat(b.quality)||0)-(parseFloat(a.quality)||0)});
   return pool[0]&&pool[0].translation ? pool[0].translation : fallback;
 }
 function doTranslate(){
@@ -734,7 +741,7 @@ function viewVoice(){
       '<button class="tile" data-usevoice="'+esc(v.voiceURI)+'" style="font-size:13px;padding:7px 10px">Взять</button></div>';
   });
   if(S.voiceURI)h+='<button class="btn dim" style="margin-top:16px" data-act="autovoice">Выбрать автоматически</button>';
-  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 8 · 2 октября</p>';
+  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 9 · 13 октября</p>';
   return h;
 }
 
