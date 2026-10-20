@@ -426,7 +426,7 @@ function plural(n,a,b,c){var m=n%100,k=n%10;return (m>=11&&m<=14)?c:(k===1?a:((k
 var V={tab:"today",mode:"home",blk:null,li:0,scene:false,
        quiz:[],qi:0,picked:null,built:[],shown:false,score:0,sheet:null,ref:"sounds",
        reviewBlk:null,reviewLi:0,reviewScene:false,
-       bkOut:"",bkCopied:false,trDir:"ru-az",trIn:"",trOut:null,trErr:null,trBusy:false};
+       bkOut:"",voicesOpen:false,bkCopied:false,trDir:"ru-az",trIn:"",trOut:null,trErr:null,trBusy:false};
 
 /* ═══════ переводчик ═══════ */
 function pickBestTranslation(data,srcText){
@@ -738,7 +738,8 @@ function viewVoice(){
   }
   function rank(v){var l=langOf(v);return l.indexOf("az")===0?0:(l.indexOf("tr")===0?1:(l.indexOf("ru")===0?2:3))}
   var sorted=list.slice().sort(function(a,b){return rank(a)-rank(b)||langOf(a).localeCompare(langOf(b))});
-  h+='<div class="mute" style="font-size:13px;margin-bottom:6px">найдено голосов: '+list.length+'</div>';
+  h+='<button class="btn dim" data-act="togglevoices">'+(V.voicesOpen?'Скрыть список голосов':'Список голосов ('+list.length+')')+'</button>';
+  if(V.voicesOpen){
   sorted.forEach(function(v){
     var on=cur.voice&&cur.voice.voiceURI===v.voiceURI;
     var r=rank(v);
@@ -752,8 +753,9 @@ function viewVoice(){
       '<button class="tile" data-usevoice="'+esc(v.voiceURI)+'" style="font-size:13px;padding:7px 10px">Взять</button></div>';
   });
   if(S.voiceURI)h+='<button class="btn dim" style="margin-top:16px" data-act="autovoice">Выбрать автоматически</button>';
+  }
   h+=backupCard();
-  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 12 · 20 октября</p>';
+  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 13 · 20 октября</p>';
   return h;
 }
 
@@ -901,6 +903,7 @@ document.addEventListener("click",function(e){
       save();load();V.mode="home";V.bkOut="";alert("Прогресс восстановлен.");render();
     }catch(e){alert("Код не распознан. Скопируй его целиком, вместе с «AZ1:» в начале.")}
     return}
+  if(d.act==="togglevoices"){V.voicesOpen=!V.voicesOpen;render();return}
   if(d.act==="start"){startSession();return}
   if(d.act==="reset"){
     if(confirm("Стереть весь прогресс и начать сначала?")){
