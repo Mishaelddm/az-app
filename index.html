@@ -426,7 +426,7 @@ function plural(n,a,b,c){var m=n%100,k=n%10;return (m>=11&&m<=14)?c:(k===1?a:((k
 var V={tab:"today",mode:"home",blk:null,li:0,scene:false,
        quiz:[],qi:0,picked:null,built:[],shown:false,score:0,sheet:null,ref:"sounds",
        reviewBlk:null,reviewLi:0,reviewScene:false,
-       trDir:"ru-az",trIn:"",trOut:null,trErr:null,trBusy:false};
+       bkOut:"",bkCopied:false,trDir:"ru-az",trIn:"",trOut:null,trErr:null,trBusy:false};
 
 /* ═══════ переводчик ═══════ */
 function pickBestTranslation(data,srcText){
@@ -708,6 +708,16 @@ function viewRun(){
   return h;
 }
 
+function backupCard(){
+  var h='';
+  h+='<div class="card" style="margin-top:22px"><div style="font-size:15px;margin-bottom:6px">Копия прогресса</div>'+
+   '<div class="mute" style="font-size:13px;line-height:1.5;margin-bottom:10px">Прогресс хранится только в этом браузере. Сохрани код, чтобы перенести его на другой телефон или адрес.</div>'+
+   '<button class="btn dim" data-act="bkexport">Скопировать код прогресса</button>'+
+   (V.bkOut?'<textarea readonly id="bkOut" rows="3" style="width:100%;margin-top:10px;background:transparent;color:var(--text);border:1px solid var(--line,#245);border-radius:10px;padding:8px;font-size:12px;box-sizing:border-box">'+esc(V.bkOut)+'</textarea><div class="mute" style="font-size:12.5px;margin-top:6px">'+(V.bkCopied?"Скопировано. Вставь код в заметки или отправь себе в мессенджер.":"Выдели весь текст и скопируй вручную.")+'</div>':'')+
+   '<textarea id="bkIn" rows="3" placeholder="Вставь сюда код прогресса" style="width:100%;margin-top:14px;background:transparent;color:var(--text);border:1px solid var(--line,#245);border-radius:10px;padding:8px;font-size:12px;box-sizing:border-box"></textarea>'+
+   '<button class="btn dim" style="margin-top:8px" data-act="bkimport">Восстановить из кода</button></div>';
+  return h;
+}
 function viewVoice(){
   var list=voices(),cur=resolveVoice();
   var MODES={az:"читает азербайджанский как есть",
@@ -723,6 +733,7 @@ function viewVoice(){
   if(!list.length){
     h+='<p class="mute" style="font-size:14px;line-height:1.6">Браузер пока не отдал список. '+
      'Нажми любую кнопку ♪ и вернись сюда — обычно после первого запуска голоса появляются.</p>';
+    h+=backupCard();
     return h;
   }
   function rank(v){var l=langOf(v);return l.indexOf("az")===0?0:(l.indexOf("tr")===0?1:(l.indexOf("ru")===0?2:3))}
@@ -741,7 +752,8 @@ function viewVoice(){
       '<button class="tile" data-usevoice="'+esc(v.voiceURI)+'" style="font-size:13px;padding:7px 10px">Взять</button></div>';
   });
   if(S.voiceURI)h+='<button class="btn dim" style="margin-top:16px" data-act="autovoice">Выбрать автоматически</button>';
-  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 9 · 13 октября</p>';
+  h+=backupCard();
+  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 10 · 20 октября</p>';
   return h;
 }
 
@@ -871,6 +883,24 @@ document.addEventListener("click",function(e){
     if(V.reviewLi+1<rb.phrases.length){V.reviewLi++;V.reviewScene=false}
     else V.reviewBlk=null;
     render();return}
+  if(d.act==="bkexport"){
+    var code="AZ1:"+btoa(unescape(encodeURIComponent(JSON.stringify(S))));
+    V.bkOut=code;V.bkCopied=false;
+    var done=function(ok){V.bkCopied=ok;render()};
+    try{navigator.clipboard.writeText(code).then(function(){done(true)},function(){done(false)})}catch(e){done(false)}
+    return}
+  if(d.act==="bkimport"){
+    var ti=document.getElementById("bkIn"),raw=(ti?ti.value:"").trim();
+    try{
+      if(raw.indexOf("AZ1:")!==0)throw 0;
+      var o=JSON.parse(decodeURIComponent(escape(atob(raw.slice(4)))));
+      if(!o||typeof o.sched!=="object"||!Array.isArray(o.doneBlocks))throw 0;
+      if(!confirm("Заменить текущий прогресс сохранённым? Сейчас: пройдено блоков "+S.doneBlocks.length+", в копии: "+o.doneBlocks.length+"."))return;
+      var keepVoice=S.voiceURI;
+      S={sched:o.sched,streak:o.streak||1,lastDay:o.lastDay||null,doneBlocks:o.doneBlocks,voiceURI:keepVoice};
+      save();load();V.mode="home";V.bkOut="";alert("Прогресс восстановлен.");render();
+    }catch(e){alert("Код не распознан. Скопируй его целиком, вместе с «AZ1:» в начале.")}
+    return}
   if(d.act==="start"){startSession();return}
   if(d.act==="reset"){
     if(confirm("Стереть весь прогресс и начать сначала?")){
