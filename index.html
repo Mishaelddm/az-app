@@ -542,6 +542,7 @@ function viewHome(){
       'Возвращайся завтра — или загляни в прогон и проговори вслух.</p>'+
       '<button class="btn" data-act="tab-run">Открыть прогон</button>'+
       '<button class="btn dim" data-act="reset">Сбросить прогресс</button>';
+    h+=backupCard();
     return h;
   }
   if(nb!==null){
@@ -554,6 +555,7 @@ function viewHome(){
   }
   h+='<button class="btn gold" data-act="start">Заниматься</button>';
   if(S.doneBlocks.length)h+='<button class="btn dim" data-act="reset">Сбросить прогресс</button>';
+  h+=backupCard();
   return h;
 }
 
@@ -733,7 +735,6 @@ function viewVoice(){
   if(!list.length){
     h+='<p class="mute" style="font-size:14px;line-height:1.6">Браузер пока не отдал список. '+
      'Нажми любую кнопку ♪ и вернись сюда — обычно после первого запуска голоса появляются.</p>';
-    h+=backupCard();
     return h;
   }
   function rank(v){var l=langOf(v);return l.indexOf("az")===0?0:(l.indexOf("tr")===0?1:(l.indexOf("ru")===0?2:3))}
@@ -752,8 +753,7 @@ function viewVoice(){
       '<button class="tile" data-usevoice="'+esc(v.voiceURI)+'" style="font-size:13px;padding:7px 10px">Взять</button></div>';
   });
   if(S.voiceURI)h+='<button class="btn dim" style="margin-top:16px" data-act="autovoice">Выбрать автоматически</button>';
-  h+=backupCard();
-  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 10 · 20 октября</p>';
+  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 11 · 20 октября</p>';
   return h;
 }
 
