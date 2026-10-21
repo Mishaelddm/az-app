@@ -12,6 +12,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Azərbaycanca">
 <link rel="apple-touch-icon" href="icon.png">
+<script>
+(function(){try{var t=localStorage.getItem("az.theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t);document.documentElement.style.colorScheme=t}}catch(e){}})();
+</script>
 <style>
   :root{--ground:#0E2229;--surface:#15323B;--edge:#20454F;--text:#EDF3F2;
         --mute:#789BA3;--accent:#E8B23A;--warm:#D6455B;--ok:#4FB58B}
@@ -64,11 +67,13 @@
         padding:4px 11px;font-size:12.5px;color:var(--mute);margin-bottom:10px}
 
   /* ── обновление оформления ── */
+  :root[data-theme="light"]{--ground:#F4F1EA;--surface:#FFFFFF;--edge:#D9D2C3;--text:#14272C;--mute:#62797F;--accent:#A9700A;--warm:#C23B50;--ok:#2B8A66}
+  :root[data-theme="light"] .card{box-shadow:0 1px 2px rgba(20,39,44,.06),0 4px 14px rgba(20,39,44,.05)}
+  :root[data-theme="light"] .sheet{background:rgba(20,39,44,.45)}
   @media (prefers-color-scheme: light){
-    :root{--ground:#F4F1EA;--surface:#FFFFFF;--edge:#D9D2C3;--text:#14272C;
-          --mute:#62797F;--accent:#A9700A;--warm:#C23B50;--ok:#2B8A66}
-    .card{box-shadow:0 1px 2px rgba(20,39,44,.06),0 4px 14px rgba(20,39,44,.05)}
-    .sheet{background:rgba(20,39,44,.45)}
+    :root:not([data-theme]){--ground:#F4F1EA;--surface:#FFFFFF;--edge:#D9D2C3;--text:#14272C;--mute:#62797F;--accent:#A9700A;--warm:#C23B50;--ok:#2B8A66}
+    :root:not([data-theme]) .card{box-shadow:0 1px 2px rgba(20,39,44,.06),0 4px 14px rgba(20,39,44,.05)}
+    :root:not([data-theme]) .sheet{background:rgba(20,39,44,.45)}
   }
   .btn,.tile,.play,.seg button,nav button{-webkit-tap-highlight-color:transparent;
     transition:transform .12s ease,background-color .15s ease,border-color .15s ease,opacity .15s ease}
@@ -415,7 +420,7 @@ function forVoice(t,mode){
 }
 if(typeof speechSynthesis!=="undefined"&&speechSynthesis.addEventListener){
   speechSynthesis.addEventListener("voiceschanged",function(){
-    if(V.tab==="ref"&&V.ref==="voice")render();
+    if(V.tab==="settings")render();
   });
 }
 function say(t){
@@ -571,7 +576,8 @@ var NAVICON={
  today:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg>',
  run:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10.2 8.6l5.2 3.4-5.2 3.4z"/></svg>',
  lessons:'<svg viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 0 4 20.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 1 1.5 1.5z"/></svg>',
- ref:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.2"/><path d="M12 7.7v.01"/></svg>'
+ ref:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.2"/><path d="M12 7.7v.01"/></svg>',
+ settings:'<svg viewBox="0 0 24 24"><path d="M4 7h9"/><path d="M17 7h3"/><circle cx="15" cy="7" r="2"/><path d="M4 17h3"/><path d="M11 17h9"/><circle cx="9" cy="17" r="2"/></svg>'
 };
 function viewHome(){
   var nb=nextBlock(),due=dueIds().length;
@@ -761,6 +767,30 @@ function backupCard(){
    '<button class="btn dim" style="margin-top:8px" data-act="bkimport">Восстановить из кода</button></div>';
   return h;
 }
+function getTheme(){try{var t=localStorage.getItem("az.theme");return (t==="dark"||t==="light")?t:"auto"}catch(e){return "auto"}}
+function applyTheme(t){
+  var r=document.documentElement;
+  if(t==="dark"||t==="light"){r.setAttribute("data-theme",t);r.style.colorScheme=t}
+  else{r.removeAttribute("data-theme");r.style.colorScheme=""}
+  try{if(t==="auto")localStorage.removeItem("az.theme");else localStorage.setItem("az.theme",t)}catch(e){}
+  var metas=document.querySelectorAll('meta[name="theme-color"]');
+  for(var i=0;i<metas.length;i++){
+    var m=metas[i],mq=m.getAttribute("media")||"";
+    if(!m.getAttribute("data-auto"))m.setAttribute("data-auto",m.getAttribute("content"));
+    m.setAttribute("content",t==="dark"?"#0E2229":(t==="light"?"#F4F1EA":m.getAttribute("data-auto")));
+  }
+}
+function viewSettings(){
+  var th=getTheme();
+  var h='<h2>Настройки</h2>'+
+   '<div style="font-size:15px;margin:18px 0 8px">Тема</div><div class="seg">'+
+   [["auto","Авто"],["dark","Тёмная"],["light","Светлая"]].map(function(x){
+     return '<button data-act="settheme" data-v="'+x[0]+'" class="'+(th===x[0]?"on":"")+'" style="flex:1 1 28%">'+x[1]+'</button>'}).join("")+
+   '</div>'+
+   '<div class="mute" style="font-size:13px;margin:-8px 0 22px">Авто следует настройке телефона.</div>'+
+   '<div style="font-size:15px;margin-bottom:8px">Голос</div>';
+  return h+viewVoice();
+}
 function viewVoice(){
   var list=voices(),cur=resolveVoice();
   var MODES={az:"читает азербайджанский как есть",
@@ -798,7 +828,7 @@ function viewVoice(){
   if(S.voiceURI)h+='<button class="btn dim" style="margin-top:16px" data-act="autovoice">Выбрать автоматически</button>';
   }
   h+=backupCard();
-  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 14 · 21 октября</p>';
+  h+='<p class="mute" style="font-size:12.5px;margin-top:22px;text-align:center">сборка 15 · 21 октября</p>';
   return h;
 }
 
@@ -828,9 +858,7 @@ function viewRef(){
    '<button data-ref="sounds" class="'+(V.ref==="sounds"?"on":"")+'">Звуки</button>'+
    '<button data-ref="harmony" class="'+(V.ref==="harmony"?"on":"")+'">Гармония</button>'+
    '<button data-ref="frames" class="'+(V.ref==="frames"?"on":"")+'">Каркасы</button>'+
-   '<button data-ref="translate" class="'+(V.ref==="translate"?"on":"")+'">Перевод</button>'+
-   '<button data-ref="voice" class="'+(V.ref==="voice"?"on":"")+'">Настройки</button></div>';
-  if(V.ref==="voice")return h+viewVoice();
+   '<button data-ref="translate" class="'+(V.ref==="translate"?"on":"")+'">Перевод</button></div>';
   if(V.ref==="translate")return h+viewTranslate();
 
   if(V.ref==="sounds"){
@@ -884,8 +912,9 @@ function render(){
   if(V.tab==="today")a.innerHTML=(V.mode==="home")?viewHome():((V.mode==="learn")?viewLearn():viewQuiz());
   else if(V.tab==="run")a.innerHTML=viewRun();
   else if(V.tab==="lessons")a.innerHTML=(V.reviewBlk!==null)?viewLessonReview():viewLessons();
+  else if(V.tab==="settings")a.innerHTML=viewSettings();
   else a.innerHTML=viewRef();
-  document.getElementById("nav").innerHTML=[["today","Сегодня"],["run","Прогон"],["lessons","Уроки"],["ref","Справочник"]]
+  document.getElementById("nav").innerHTML=[["today","Сегодня"],["run","Прогон"],["lessons","Уроки"],["ref","Справочник"],["settings","Настройки"]]
     .map(function(x){return '<button data-tab="'+x[0]+'" class="'+(V.tab===x[0]?"on":"")+'">'+NAVICON[x[0]]+'<span>'+x[1]+'</span></button>'}).join("");
   var old=document.getElementById("sheet");if(old)old.parentNode.removeChild(old);
   if(V.sheet){
@@ -910,6 +939,7 @@ document.addEventListener("click",function(e){
       u.voice=v;u.lang=v.lang;u.rate=.85;speechSynthesis.speak(u)}catch(e){}}
     return}
   if(d.usevoice!==undefined){S.voiceURI=d.usevoice;save();render();return}
+  if(d.act==="settheme"){applyTheme(d.v);render();return}
   if(d.act==="autovoice"){S.voiceURI=null;save();render();return}
   if(d.letter!==undefined){V.sheet=d.letter;render();return}
   if(d.act==="closesheet"){V.sheet=null;render();return}
